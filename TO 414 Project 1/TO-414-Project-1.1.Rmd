@@ -13,6 +13,23 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Group Project 1: Due on 2/21
 
+Look at resort vs city hotel
+
+What role do meals play?
+  
+  average daily rate by distribution channel
+
+cancellations and 
+
+
+```{r}
+hotel_data$total_reservations = hotel_data$previous_bookings_not_canceled + hotel_data$previous_cancellations
+
+filter(hotel_data, is_repeated_guest == 1) %>%
+  select(is_repeated_guest, previous_bookings_not_canceled, previous_cancellations, total_reservations)
+```
+
+
 ```{r}
 library(tidyverse)
 hotel_data = read.csv("hotel_bookings.csv")
@@ -146,6 +163,10 @@ We can see that as the number of adults in a booking increases through reservati
 ```{r}
 filter(hotel_data, adr < 1000, adults < 5) %>%
 ggplot(aes(x = as.factor(adults), y = adr)) +
+  geom_boxplot()
+
+filter(hotel_data, adr < 1000, children < 10) %>%
+  ggplot(aes(x = as.factor(children), y = adr)) +
   geom_boxplot()
 ```
 
