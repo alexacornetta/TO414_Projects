@@ -12,11 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Group Project 1: Due on 2/21
-emails = 
-bssmit
-tzhx
-rockej
-bryanyu
 
 ```{r}
 library(tidyverse)
