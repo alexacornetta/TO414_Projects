@@ -17,9 +17,11 @@ Look at resort vs city hotel
 
 What role do meals play?
   
-  average daily rate by distribution channel
+average daily rate by distribution channel
 
-cancellations and 
+
+
+https://www.kaggle.com/jessemostipak/hotel-booking-demand
 
 
 ```{r}
