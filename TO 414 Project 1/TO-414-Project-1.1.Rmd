@@ -25,6 +25,7 @@ https://www.kaggle.com/jessemostipak/hotel-booking-demand
 
 
 ```{r}
+library(tidyverse)
 hotel_data$total_reservations = hotel_data$previous_bookings_not_canceled + hotel_data$previous_cancellations
 
 filter(hotel_data, is_repeated_guest == 1) %>%
@@ -33,7 +34,7 @@ filter(hotel_data, is_repeated_guest == 1) %>%
 
 
 ```{r}
-library(tidyverse)
+
 hotel_data = read.csv("hotel_bookings.csv")
 
 hotel_data$arrival_date_year = as.factor(hotel_data$arrival_date_year)
@@ -57,8 +58,8 @@ An important initial note. We don't have the data for every month in every year.
 hotel_data$month_num = match(hotel_data$arrival_date_month, month.name)
 
 #Number of cancellations broken down by year then month
-num_cancellations_by_year_month = group_by(hotel_data, arrival_date_year, month_num, is_canceled) %>%
-  summarize(num_cancellations = n())
+(num_cancellations_by_year_month = group_by(hotel_data, arrival_date_year, month_num, is_canceled) %>%
+  summarize(num_cancellations = n()))
 
 ggplot(num_cancellations_by_year_month, aes(x = month_num, y = num_cancellations)) +
   geom_bar(aes(fill = as.factor(is_canceled)),stat = "identity") +
@@ -184,5 +185,6 @@ ggplot(data = hotel_data, aes(x = month_num)) +
   geom_bar() +
   scale_x_continuous(name="Month", breaks = seq(0,12, 1))
 ```
+
 
 
