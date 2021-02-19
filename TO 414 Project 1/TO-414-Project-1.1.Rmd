@@ -23,18 +23,7 @@ average daily rate by distribution channel
 
 https://www.kaggle.com/jessemostipak/hotel-booking-demand
 
-
 ```{r}
-library(tidyverse)
-hotel_data$total_reservations = hotel_data$previous_bookings_not_canceled + hotel_data$previous_cancellations
-
-filter(hotel_data, is_repeated_guest == 1) %>%
-  select(is_repeated_guest, previous_bookings_not_canceled, previous_cancellations, total_reservations)
-```
-
-
-```{r}
-
 hotel_data = read.csv("hotel_bookings.csv")
 
 hotel_data$arrival_date_year = as.factor(hotel_data$arrival_date_year)
@@ -42,6 +31,42 @@ hotel_data$arrival_date_month = as.factor(hotel_data$arrival_date_month)
 hotel_data$arrival_date_week_number = as.factor(hotel_data$arrival_date_week_number)
 hotel_data$arrival_date_day_of_month = as.factor(hotel_data$arrival_date_day_of_month)
 ```
+
+
+
+```{r}
+library(tidyverse)
+hotel_data$total_reservations = hotel_data$previous_bookings_not_canceled + hotel_data$previous_cancellations
+
+filter(hotel_data, is_repeated_guest == 1) %>%
+  select(is_repeated_guest, previous_bookings_not_canceled, previous_cancellations, total_reservations) #This needs to be removed, it is 3800 lines when we knit
+```
+
+
+## Make Factors 
+```{r}
+summary(hotel_data)
+head(hotel_data)
+
+# Factor needed variables
+hotel_data$is_canceled = as.factor(hotel_data$is_canceled)
+hotel_data$is_repeated_guest = as.factor(hotel_data$is_repeated_guest)
+hotel_data$company = as.factor(hotel_data$company)
+hotel_data$hotel = as.factor(hotel_data$hotel)
+hotel_data$arrival_date_month = as.factor(hotel_data$arrival_date_month)
+hotel_data$country = as.factor(hotel_data$country)
+hotel_data$market_segment = as.factor(hotel_data$market_segment)
+hotel_data$distribution_channel = as.factor(hotel_data$distribution_channel)
+hotel_data$reserved_room_type = as.factor(hotel_data$reserved_room_type)
+hotel_data$assigned_room_type = as.factor(hotel_data$assigned_room_type)
+hotel_data$agent = as.factor(hotel_data$agent)
+hotel_data$reservation_status_date = as.factor(hotel_data$reservation_status_date)
+hotel_data$reservation_status = as.factor(hotel_data$reservation_status)
+hotel_data$customer_type = as.factor(hotel_data$customer_type)
+hotel_data$deposit_type = as.factor(hotel_data$deposit_type)
+
+```
+
 
 **Basic Data Structure**
 ```{r}
@@ -186,5 +211,28 @@ ggplot(data = hotel_data, aes(x = month_num)) +
   scale_x_continuous(name="Month", breaks = seq(0,12, 1))
 ```
 
+## Hotel By Country
+```{r}
+hotel_data$country = match(hotel_data$reservation_status,hotel_data$country )
+num_cancellations_by_country = group_by(hotel_data, hotel_data$country, is_canceled)
+summarize(num_cancellations_by_country)
+
+```
+
+```{r}
+ git config --global user.email "tahmoush@umich.edu"
+  git config --global user.name "Benjamin Tahmoush"
+```
+
+
+```{r}
+ggplot(num_cancellations_by_country, aes(x = country, y = num_cancellations)) +
+  geom_bar(aes(fill = as.factor(is_canceled)),stat = "identity") +
+  facet_wrap(~arrival_date_year) +
+  scale_x_continuous(name="Country", breaks = seq(0,12, 1)) +
+  scale_fill_discrete(name = "", labels = c("Not Canceled", "Canceled")) +
+  ggtitle("Number of Cancellations and Reservations in Each Country") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
 
 
