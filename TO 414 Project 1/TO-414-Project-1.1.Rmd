@@ -37,16 +37,13 @@ hotel_data$arrival_date_day_of_month = as.factor(hotel_data$arrival_date_day_of_
 ```{r}
 library(tidyverse)
 hotel_data$total_reservations = hotel_data$previous_bookings_not_canceled + hotel_data$previous_cancellations
-
-filter(hotel_data, is_repeated_guest == 1) %>%
-  select(is_repeated_guest, previous_bookings_not_canceled, previous_cancellations, total_reservations) #This needs to be removed, it is 3800 lines when we knit
 ```
 
 
 ## Make Factors 
 ```{r}
-summary(hotel_data)
-head(hotel_data)
+#summary(hotel_data)
+#head(hotel_data)
 
 # Factor needed variables
 hotel_data$is_canceled = as.factor(hotel_data$is_canceled)
@@ -83,10 +80,10 @@ An important initial note. We don't have the data for every month in every year.
 hotel_data$month_num = match(hotel_data$arrival_date_month, month.name)
 
 #Number of cancellations broken down by year then month
-(num_cancellations_by_year_month = group_by(hotel_data, arrival_date_year, month_num, is_canceled) %>%
-  summarize(num_cancellations = n()))
+res_breakdown_by_year_month = group_by(hotel_data, arrival_date_year, month_num, is_canceled) %>%
+  summarize(num_reservations = n())
 
-ggplot(num_cancellations_by_year_month, aes(x = month_num, y = num_cancellations)) +
+ggplot(res_breakdown_by_year_month, aes(x = month_num, y = num_reservations)) +
   geom_bar(aes(fill = as.factor(is_canceled)),stat = "identity") +
   facet_wrap(~arrival_date_year) +
   scale_x_continuous(name="Month", breaks = seq(0,12, 1)) +
@@ -95,53 +92,73 @@ ggplot(num_cancellations_by_year_month, aes(x = month_num, y = num_cancellations
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-**Number of reservations broken down by year and month but trend lines**
+**Percent of Reservations Canceled in Each Year and Month**
 ```{r}
-#Number of reservations in each month, broken down by year
-num_res_year_month = hotel_data %>%
+#Number of reservations canceled by year, and month
+t = hotel_data %>%
   group_by(arrival_date_year, month_num) %>%
-  summarize(num_reservations = n())
+  summarize(num_reservations_made = n()) %>%
+   arrange(desc(arrival_date_year, month_num))
 
-ggplot(num_res_year_month, aes(x = month_num, y = num_reservations)) +
-  geom_smooth(aes(color = arrival_date_year)) +
-  geom_point(aes(color = arrival_date_year)) +
-  scale_x_continuous(name="Month", breaks = seq(0,12, 1))
-```
+#Num reservations by year, and month
+t1 = hotel_data %>%
+  group_by(arrival_date_year, month_num, is_canceled) %>%
+  summarize(num_reservations = n()) %>%
+  arrange(arrival_date_year, month_num)
 
-**Percentage of reservations canceled broken down by year and month**
-```{r}
-#filtering data to show how many cancellations in each year and month
-test = num_cancellations_by_year_month %>%
-  filter(is_canceled == 1) #selecting all the 
+#Duplicating the dataframe t so that it can bind with dataframe t1
+t2 = rbind(t, t) %>%
+  arrange(arrival_date_year, month_num)
 
-percent_reservations_canceled = merge(num_res_year_month, test, by = c("arrival_date_year", "month_num")) %>%
-  mutate(percent_canceled = (num_cancellations/num_reservations)*100) %>%
-  select(arrival_date_year, month_num, percent_canceled)
+#Final Dataframe
+t4 = (cbind(t1, t2) %>%
+  select(arrival_date_year, month_num, is_canceled, num_reservations, num_reservations_made) %>%
+  mutate(percent_reservations = num_reservations/num_reservations_made))
 
-ggplot(percent_reservations_canceled, aes(x = month_num, y = percent_canceled)) +
-  geom_bar(stat = "identity") +
-  scale_x_continuous(name="Month", breaks = seq(0,12, 1)) +
+#Generating Bargraph
+ggplot(t4, aes(x = month_num, y = percent_reservations)) +
+  geom_bar(aes(fill = as.factor(is_canceled)),stat = "identity") +
   facet_wrap(~arrival_date_year) +
-  ggtitle("Percentage of Cancellations in Each Year For Each Month") +
+  scale_x_continuous(name="Month", breaks = seq(0,12, 1)) +
+  scale_y_continuous(name="Percent of Reservations") + 
+  scale_fill_discrete(name = "", labels = c("Not Canceled", "Canceled")) +
+  ggtitle("Percent of Reservations Canceled or Not Cancelled \n in Each Year For Each Month") +
   theme(plot.title = element_text(hjust = 0.5))
-  
 ```
 
 
-**Length of Stay**
-
-After calculating the total length of stay, we show the total length of stay with basic descriptive statistics and a histogram. We can see that the mean and median are 3.428 and 3 days respectively.
+**Percent of Reservations Canceled in Each Year and Month Broken Down By Hotel Type**
 ```{r}
-#Total length of stay
-hotel_data$total_stay = hotel_data$stays_in_week_nights + hotel_data$stays_in_weekend_nights
+#Number of reservations canceled by hotel type, year, and month
+t1 = hotel_data %>%
+  group_by(hotel, arrival_date_year, month_num, is_canceled) %>%
+  summarize(num_reservations = n()) %>%
+  arrange(hotel, arrival_date_year, month_num)
 
-summary(hotel_data$total_stay)
+#Num reservations by hotel type, year, and month
+t = hotel_data %>%
+  group_by(hotel, arrival_date_year, month_num) %>%
+  summarize(num_reservations_made = n()) %>%
+   arrange(desc(hotel, arrival_date_year, month_num))
 
-filter(hotel_data, total_stay < 20) %>%
-ggplot(aes(x = total_stay)) +
-  geom_histogram(binwidth = 1) +
-  geom_vline(aes(xintercept = mean(total_stay)), color = "lightblue") +
-  geom_vline(aes(xintercept = median(total_stay)), color = "navy")
+#Duplicating the dataframe t so that it can bind with dataframe t1
+t2 = rbind(t, t) %>%
+  arrange(hotel, arrival_date_year, month_num)
+
+#Final Dataframe
+t4 = (cbind(t1, t2) %>%
+  select(hotel, arrival_date_year, month_num, is_canceled, num_reservations, num_reservations_made) %>%
+  mutate(percent_reservations = num_reservations/num_reservations_made))
+
+#Generating Bargraph
+ggplot(t4, aes(x = month_num, y = percent_reservations)) +
+  geom_bar(aes(fill = as.factor(is_canceled)),stat = "identity") +
+  facet_grid(hotel ~ arrival_date_year) +
+  scale_x_continuous(name="Month", breaks = seq(0,12, 1)) +
+  scale_y_continuous(name="Percent of Reservations") + 
+  scale_fill_discrete(name = "", labels = c("Not Canceled", "Canceled")) +
+  ggtitle("Percentage of Reservations Canceled or Not Canceled \n in Each Year For Each Month by Hotel") +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 **Lead Time and Cancellations**
@@ -155,6 +172,21 @@ filter(hotel_data, lead_time < 600) %>%
 ggplot(aes(x = lead_time)) +
   geom_histogram() +
   facet_wrap(~is_canceled)
+```
+
+**Length of Stay**
+After calculating the total length of stay, we show the total length of stay with basic descriptive statistics and a histogram. We can see that the mean and median are 3.428 and 3 days respectively.
+```{r}
+#Total length of stay
+hotel_data$total_stay = hotel_data$stays_in_week_nights + hotel_data$stays_in_weekend_nights
+
+summary(hotel_data$total_stay)
+
+filter(hotel_data, total_stay < 20) %>%
+ggplot(aes(x = total_stay)) +
+  geom_histogram(binwidth = 1) +
+  geom_vline(aes(xintercept = mean(total_stay)), color = "lightblue") +
+  geom_vline(aes(xintercept = median(total_stay)), color = "navy")
 ```
 
 **Cancellations and Market Segment**
@@ -186,7 +218,6 @@ reservations
 ```
 
 **Average Daily Rate and Number of Adults**
-
 We can see that as the number of adults in a booking increases through reservations of four adults, the average daily rate also increases. There are reservations with more than 4 people, but there are not enough to generate boxplots. 
 ```{r}
 filter(hotel_data, adr < 1000, adults < 5) %>%
@@ -220,19 +251,26 @@ summarize(num_cancellations_by_country)
 ```
 
 ```{r}
- git config --global user.email "tahmoush@umich.edu"
-  git config --global user.name "Benjamin Tahmoush"
+ #git config --global user.email "tahmoush@umich.edu"
+#git config --global user.name "Benjamin Tahmoush"
 ```
 
 
 ```{r}
-ggplot(num_cancellations_by_country, aes(x = country, y = num_cancellations)) +
-  geom_bar(aes(fill = as.factor(is_canceled)),stat = "identity") +
-  facet_wrap(~arrival_date_year) +
-  scale_x_continuous(name="Country", breaks = seq(0,12, 1)) +
-  scale_fill_discrete(name = "", labels = c("Not Canceled", "Canceled")) +
-  ggtitle("Number of Cancellations and Reservations in Each Country") +
-  theme(plot.title = element_text(hjust = 0.5))
+#ggplot(num_cancellations_by_country, aes(x = country, y = num_cancellations)) +
+#  geom_bar(aes(fill = as.factor(is_canceled)),stat = "identity") +
+#  facet_wrap(~arrival_date_year) +
+#  scale_x_continuous(name="Country", breaks = seq(0,12, 1)) +
+#  scale_fill_discrete(name = "", labels = c("Not Canceled", "Canceled")) +
+#  ggtitle("Number of Cancellations and Reservations in Each Country") +
+#  theme(plot.title = element_text(hjust = 0.5))
 ```
+
+
+
+
+
+
+
 
 
