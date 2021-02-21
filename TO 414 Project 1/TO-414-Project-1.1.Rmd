@@ -38,7 +38,7 @@ After conducting an analysis of two years worth of data from 2015 to 2017, we ha
 
 ## **Import and Data Cleaning**
 
-First, we are importing the hotel_bookings dataset, so that we may begin to explore and gain helpful insights from it.Now we will identify variables that would be most helpful to us as factors, and convert them into such
+First, we are importing the hotel_bookings dataset, so that we may begin to explore and gain helpful insights from it. Now we will identify variables that would be most helpful to us as factors, and convert them into such
 ```{r}
 library(tidyverse)
 library(knitr)
@@ -98,7 +98,7 @@ ggplot(res_breakdown_by_year_month, aes(x = month_num, y = num_reservations)) +
 
 When we break down the reservations by percentages, the actual percentage of reservations that gets canceled each month doesn't vary too much. It oscillates around about 30%. 
 
-This number is more helpful for us to analyze, as conclusions could be skewed if we just look at the number of cancellations without taking into account the total reservations as well.
+Using a percentage is more helpful for us to analyze, as conclusions could be skewed if we just look at the number of cancellations without taking into account the total reservations as well.
 ```{r}
 #Number of reservations canceled by year, and month
 t = hotel_data %>%

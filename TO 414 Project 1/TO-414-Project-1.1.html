@@ -1531,7 +1531,7 @@ div.tocify {
 </div>
 <div id="import-and-data-cleaning" class="section level2">
 <h2><strong>Import and Data Cleaning</strong></h2>
-<p>First, we are importing the hotel_bookings dataset, so that we may begin to explore and gain helpful insights from it.Now we will identify variables that would be most helpful to us as factors, and convert them into such</p>
+<p>First, we are importing the hotel_bookings dataset, so that we may begin to explore and gain helpful insights from it. Now we will identify variables that would be most helpful to us as factors, and convert them into such</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre><code>## ── Attaching packages ─────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
 <pre><code>## ✔ ggplot2 3.3.3     ✔ purrr   0.3.3
@@ -1595,7 +1595,7 @@ ggplot(res_breakdown_by_year_month, aes(x = month_num, y = num_reservations)) +
 <div id="percent-of-reservations-canceled-in-each-year-and-month" class="section level4">
 <h4><strong>Percent of Reservations Canceled in Each Year and Month</strong></h4>
 <p>When we break down the reservations by percentages, the actual percentage of reservations that gets canceled each month doesn’t vary too much. It oscillates around about 30%.</p>
-<p>This number is more helpful for us to analyze, as conclusions could be skewed if we just look at the number of cancellations without taking into account the total reservations as well.</p>
+<p>Using a percentage is more helpful for us to analyze, as conclusions could be skewed if we just look at the number of cancellations without taking into account the total reservations as well.</p>
 <pre class="r"><code>#Number of reservations canceled by year, and month
 t = hotel_data %&gt;%
   group_by(arrival_date_year, month_num) %&gt;%
