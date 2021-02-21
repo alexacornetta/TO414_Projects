@@ -1,7 +1,7 @@
 ---
 title: "TO 414 Group Project 1"
-author: "Shibi Sanjeev, Bryan Yu, Anthony Zhao, Ben Smith, Jackson Rocke"
-date: "2/10/2021"
+author: "Shibi Sanjeev, Alexa Cornetta, Ben Tahmoush, Albi Popaj, Gjergj Camaj"
+date: "2/20/2021"
 output:
   html_document: default
   pdf_document: default
@@ -11,15 +11,19 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Group Project 1: Due on 2/21
+Our first Group Project asks us to analyze the hotel_bookings data and extract meaningful business insights from it. We will walk you through our process and findings in this report. 
 
-Look at resort vs city hotel
+The data we will be working with can be found at: https://www.kaggle.com/jessemostipak/hotel-booking-demand
+
 
 What role do meals play?
   
 average daily rate by distribution channel
 
-https://www.kaggle.com/jessemostipak/hotel-booking-demand
+
+
+##Import
+First, we are importing the hotel_bookings dataset, so that we may begin to explore and gain helpful insights from it. 
 
 ```{r}
 hotel_data = read.csv("hotel_bookings.csv")
@@ -30,7 +34,7 @@ hotel_data$arrival_date_week_number = as.factor(hotel_data$arrival_date_week_num
 hotel_data$arrival_date_day_of_month = as.factor(hotel_data$arrival_date_day_of_month)
 ```
 
-
+We will now install a package of helpful tools, called tidyverse, that we can use to manipulate and analyze the data we have imported. 
 
 ```{r}
 library(tidyverse)
@@ -39,6 +43,7 @@ hotel_data$total_reservations = hotel_data$previous_bookings_not_canceled + hote
 
 
 ## Make Factors 
+Now we will identify variables that would be most helpful to us as factors, and convert them into such
 ```{r}
 #summary(hotel_data)
 #head(hotel_data)
@@ -63,14 +68,17 @@ hotel_data$deposit_type = as.factor(hotel_data$deposit_type)
 ```
 
 
-**Basic Data Structure**
+##**Basic Data Structure**
+To start, it will be helpful to get a good look at all of our data and how it is structured. We will do this below,
 ```{r}
 #str(hotel_data)
 ```
 
 ### **Cancellations**
 
-An important initial note. We don't have the data for every month in every year. In 2016, we have data for all three months. In 2017, we have data from January until August. In 2015, we only have data from July to December. The only months with three years of data are July and August. All other months only have two years worth of data from either 2015 and 2016 or 2016 and 2017.
+An important initial note. We don't have the data for every month in every year. In 2016, we have data for all twelve months. In 2017, we have data from January until August. In 2015, we only have data from July to December. The only months with three years of data are July and August. All other months only have two years worth of data from either 2015 and 2016 or 2016 and 2017.
+
+Now we will begin exploring our data:
 
 **Number of cancellations broken down by year and month**
 ```{r}
@@ -81,6 +89,7 @@ hotel_data$month_num = match(hotel_data$arrival_date_month, month.name)
 res_breakdown_by_year_month = group_by(hotel_data, arrival_date_year, month_num, is_canceled) %>%
   summarize(num_reservations = n())
 
+#Graphical representation of # of cancellations and reservations by year and month
 ggplot(res_breakdown_by_year_month, aes(x = month_num, y = num_reservations)) +
   geom_bar(aes(fill = as.factor(is_canceled)),stat = "identity") +
   facet_wrap(~arrival_date_year) +
@@ -93,6 +102,8 @@ ggplot(res_breakdown_by_year_month, aes(x = month_num, y = num_reservations)) +
 **Percent of Reservations Canceled in Each Year and Month**
 
 When we break down the reservations by percentages, the actual percentage of reservations that gets canceled each month doesn't vary too much. It oscillates around about 30%. 
+
+This number is more helpful for us to analyze, as conclusions could be skewed if we just look at the number of cancellations without taking into account the total reservations as well.
 ```{r}
 #Number of reservations canceled by year, and month
 t = hotel_data %>%
@@ -181,8 +192,10 @@ ggplot(aes(x = lead_time)) +
 
 ## City vs Resort Hotels
 
+We are looking now at if there is a meaningful difference between cancellations at city vs resort hotels
 **Number of Reservations at City Hotels and Resort Hotels**
 ```{r}
+
 group_by(hotel_data, hotel) %>%
   summarize(count = n(), percent_canceled = sum(is_canceled)/n(), avg_daily_rate = mean(adr, na.rm = T), avg_stay = mean(total_stay, na.rm = T))
 ```
@@ -190,6 +203,8 @@ group_by(hotel_data, hotel) %>%
 
 
 **Length of Stay**
+While the average stay is about the same length, resort hotels will have more longer stays than city hotels (they have a bigger range)
+
 ```{r}
 #Calculating the total length of stay
 hotel_data$total_stay = hotel_data$stays_in_week_nights + hotel_data$stays_in_weekend_nights
@@ -199,7 +214,7 @@ City_Hotel_Data = summary(filter(hotel_data, hotel == "City Hotel")$total_stay)
 
 Resort_Hotel_Data = summary(filter(hotel_data, hotel == "Resort Hotel")$total_stay)
 
-(total_stay_data = as.data.frame(cbind(City_Hotel, Resort_Hotel_Data)))
+(total_stay_data = as.data.frame(cbind(City_Hotel_Data, Resort_Hotel_Data)))
 
 filter(hotel_data, total_stay <= 20) %>%
 ggplot(aes(x = hotel, y = total_stay)) +
@@ -248,12 +263,13 @@ group_by(hotel_data, hotel, market_segment) %>%
 
 
 **Cancellations and Market Segment**
+Groups have the highest cancellation rate, but Online TAs have the highest number of cancelled reservations.
 ```{r}
 #Number of reservations by market segment
 a = group_by(hotel_data, market_segment) %>%
   summarize(total_reservations = n())
 
-#Number of uncanceled reservations by market segment
+#Number of un-canceled reservations by market segment
 b = filter(hotel_data, is_canceled == 0)  %>%
 group_by(market_segment) %>%
   summarize(number_uncanceled_reservations = n())
@@ -288,12 +304,13 @@ filter(hotel_data, adr < 1000, children < 10) %>%
 ```
 
 **Average Daily Rate and Month**
+We can see from this that the month of August has the highest average daily rate.
 ```{r}
 #Average Daily Rate by Month
 group_by(hotel_data, month_num) %>%
   summarize(avg_adr = mean(adr, na.rm = TRUE))
 ```
-
+##What is this?
 ```{r}
 ggplot(data = hotel_data, aes(x = month_num)) +
   geom_bar() +
@@ -308,11 +325,6 @@ summarize(num_cancellations_by_country)
 
 ```
 
-```{r}
- #git config --global user.email "tahmoush@umich.edu"
-#git config --global user.name "Benjamin Tahmoush"
-```
-
 
 ```{r}
 #ggplot(num_cancellations_by_country, aes(x = country, y = num_cancellations)) +
@@ -323,9 +335,27 @@ summarize(num_cancellations_by_country)
 #  ggtitle("Number of Cancellations and Reservations in Each Country") +
 #  theme(plot.title = element_text(hjust = 0.5))
 ```
+##Cancellations and Number of Children
+We see here that having a higher number of children increases the chances of a cancellation. 
+```{r}
+causality(children, cause = NULL, vcov.=NULL, boot=FALSE, boot.runs=100)
+```
+##Cancellations and Repeated Guests
+Here we will analyze the data to see if repeated guests are more likely to not cancel their reservation compared to non-repeat guests
+
+This may lead us to the development of a loyalty program.
+```{r}
+
+```
+##Deposit and Cancellations
+Does requiring a deposit make a reservation less likely to be cancelled?
+```{r}
+
+```
 
 
-
+##Conclusions
+We should have a section here where we summarize all of the business insights we took away from this 
 
 
 
