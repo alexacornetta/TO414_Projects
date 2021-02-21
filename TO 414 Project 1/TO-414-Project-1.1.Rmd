@@ -226,11 +226,17 @@ ggplot(aes(x = total_stay)) +
 ## **Market Segment**
 
 **Market Segment and Average Daily Rate **
+
+From this here, we can see that the average daily rate is highest when reservations are made with online travel agents, direct reservations, and aviation companies. Additionally, most reservations are made with online travel agents, offline travel agents or tour operators, direct reservations, and groups, respectively. 
+
+An important note is that almost 61% of reservations made by groups are canceled. Another one is that while Aviation does have a high daily rate, there have only been 237 reservations placed over this two year period. 
+
+We would recommend focusing marketing and trying to boost traction with online travel agents, direct reservations, offline travel agents or tour operators, and groups. This is because these all have relatively high average daily rates and make up a significant portion of the number of reservations. If you were to hone in on one, we would recommend focusing on online travel agents.
 ```{r}
-group_by(hotel_data, market_segment) %>%
-  summarize(avg_daily_rate = round(mean(adr, na.rm = T), 2), count = n(), num_cancellations = sum(is_canceled)) %>%
+(market_segment_info = (group_by(hotel_data, market_segment) %>%
+  summarize(avg_daily_rate = round(mean(adr, na.rm = T), 2), avg_stay = mean(total_stay, na.rm = T), count = n(), num_cancellations = sum(is_canceled)) %>%
   mutate(percent_canceled = round((num_cancellations/count)*100, 2)) %>%
-  arrange(desc(avg_daily_rate))
+  arrange(desc(avg_daily_rate))))
 ```
 
 ```{r}
