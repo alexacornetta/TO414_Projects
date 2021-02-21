@@ -87,6 +87,7 @@ ggplot(res_breakdown_by_year_month, aes(x = month_num, y = num_reservations)) +
   geom_bar(aes(fill = as.factor(is_canceled)),stat = "identity") +
   facet_wrap(~arrival_date_year) +
   scale_x_continuous(name="Month", breaks = seq(0,12, 1)) +
+  scale_y_continuous(name="Number of Reservations") +
   scale_fill_discrete(name = "", labels = c("Not Canceled", "Canceled")) +
   ggtitle("Number of Cancellations and Reservations in Each Year For Each Month") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -156,7 +157,7 @@ ggplot(aes(x = lead_time)) +
 We are seeing that 99% of non refundable reservations were canceled. While our calculation makes sense, this is hard to understand in a real world context. **Is there a mistake with the data?**
 ```{r}
 group_by(hotel_data, deposit_type) %>%
-  summarize(count = n(), cancellations = sum(is_canceled), percent_canceled = sum(is_canceled)/n())
+  summarize(count = n(), cancellations = sum(is_canceled), percent_canceled = (sum(is_canceled)/n())*100)
 ```
 
 
