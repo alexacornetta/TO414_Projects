@@ -91,6 +91,7 @@ ggplot(res_breakdown_by_year_month, aes(x = month_num, y = num_reservations)) +
 ```
 
 **Percent of Reservations Canceled in Each Year and Month**
+
 When we break down the reservations by percentages, the actual percentage of reservations that gets canceled each month doesn't vary too much. It oscillates around about 30%. 
 ```{r}
 #Number of reservations canceled by year, and month
@@ -127,8 +128,8 @@ ggplot(t4, aes(x = month_num, y = percent_reservations)) +
 
 
 **Percent of Reservations Canceled in Each Year and Month Broken Down By Hotel Type**
-When breaking down the cancellations further into the hotel type, we can see that, on average, trips to resorts are canceled less than trips to the city hotels. This is most likely because resort trips will more often than not be for vacation, whereas city hotel trips could be for business or a multitude of other reasons. An important note is that there almost twice as many reservations at city hotels than resorts, which could contribute to the difference in cancellation rates.
 
+When breaking down the cancellations further into the hotel type, we can see that, on average, trips to resorts are canceled less than trips to the city hotels. This is most likely because resort trips will more often than not be for vacation, whereas city hotel trips could be for business or a multitude of other reasons. An important note is that there almost twice as many reservations at city hotels than resorts, which could contribute to the difference in cancellation rates.
 
 
 ```{r}
@@ -164,12 +165,6 @@ ggplot(t4, aes(x = month_num, y = percent_reservations)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-**Number of Reservations at City Hotels and Resort Hotels**
-```{r}
-group_by(hotel_data, hotel) %>%
-  summarize(count = n())
-```
-
 **Lead Time and Cancellations**
 We can see that people who book earlier are more likely to cancel than those who book really late. This is likely because it is easier to plan for a shorter period of time and you are less likely to have unforeseen changes to their plans.
 ```{r}
@@ -184,19 +179,47 @@ ggplot(aes(x = lead_time)) +
   facet_wrap(~is_canceled)
 ```
 
-**Length of Stay**
-After calculating the total length of stay, we show the total length of stay with basic descriptive statistics and a histogram. We can see that the mean and median are 3.428 and 3 days respectively.
+## City vs Resort Hotels
+
+**Number of Reservations at City Hotels and Resort Hotels**
 ```{r}
-#Total length of stay
+group_by(hotel_data, hotel) %>%
+  summarize(count = n(), percent_canceled = sum(is_canceled)/n(), avg_daily_rate = mean(adr, na.rm = T), avg_stay = mean(total_stay, na.rm = T))
+```
+
+
+
+**Length of Stay**
+```{r}
+#Calculating the total length of stay
 hotel_data$total_stay = hotel_data$stays_in_week_nights + hotel_data$stays_in_weekend_nights
 
-summary(hotel_data$total_stay)
+#Table of summary data of total stay broken down by city and resort hotels 
+City_Hotel_Data = summary(filter(hotel_data, hotel == "City Hotel")$total_stay)
 
+Resort_Hotel_Data = summary(filter(hotel_data, hotel == "Resort Hotel")$total_stay)
+
+(total_stay_data = as.data.frame(cbind(City_Hotel, Resort_Hotel_Data)))
+
+filter(hotel_data, total_stay <= 20) %>%
+ggplot(aes(x = hotel, y = total_stay)) +
+  geom_boxplot() +
+  ggtitle("Length of Stay Based on Hotel Type") +
+  xlab("Hotel Type") +
+  ylab("Length of Stay") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+#Histogram showing distribution of percentage of reservations for length of stay broken down by city and resort hotels
 filter(hotel_data, total_stay < 20) %>%
 ggplot(aes(x = total_stay)) +
-  geom_histogram(binwidth = 1) +
-  geom_vline(aes(xintercept = mean(total_stay)), color = "lightblue") +
-  geom_vline(aes(xintercept = median(total_stay)), color = "navy")
+  geom_histogram(aes(y = stat(density)), binwidth = 1) +
+  facet_wrap(~hotel) +
+  ggtitle("Histogram of Length of Reservations for City and Resort Hotels") +
+  scale_x_continuous(name="Number of Days") +
+  scale_y_continuous(name="Percent of Reservations") +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 
