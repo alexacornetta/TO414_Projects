@@ -1542,6 +1542,8 @@ div.tocify {
 <pre><code>## ── Conflicts ────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(knitr)</code></pre>
+<pre><code>## Warning: package 'knitr' was built under R version 3.6.2</code></pre>
 <pre class="r"><code>hotel_data = read.csv(&quot;hotel_bookings.csv&quot;)
 
 #Converting to factors 
@@ -1649,13 +1651,38 @@ ggplot(aes(x = lead_time)) +
 <h4><strong>Deposit Fees and Cancellations</strong></h4>
 <p>We are seeing that 99% of non refundable reservations were canceled. While our calculation makes sense, this is hard to understand in a real world context. <strong>Is there a mistake with the data?</strong></p>
 <pre class="r"><code>group_by(hotel_data, deposit_type) %&gt;%
-  summarize(count = n(), cancellations = sum(is_canceled), percent_canceled = (sum(is_canceled)/n())*100)</code></pre>
-<pre><code>## # A tibble: 3 x 4
-##   deposit_type  count cancellations percent_canceled
-##   &lt;fct&gt;         &lt;int&gt;         &lt;int&gt;            &lt;dbl&gt;
-## 1 No Deposit   104641         29694             28.4
-## 2 Non Refund    14587         14494             99.4
-## 3 Refundable      162            36             22.2</code></pre>
+  summarize(count = n(), cancellations = sum(is_canceled), percent_canceled = (sum(is_canceled)/n())*100) %&gt;%
+  kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">deposit_type</th>
+<th align="right">count</th>
+<th align="right">cancellations</th>
+<th align="right">percent_canceled</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">No Deposit</td>
+<td align="right">104641</td>
+<td align="right">29694</td>
+<td align="right">28.37702</td>
+</tr>
+<tr class="even">
+<td align="left">Non Refund</td>
+<td align="right">14587</td>
+<td align="right">14494</td>
+<td align="right">99.36245</td>
+</tr>
+<tr class="odd">
+<td align="left">Refundable</td>
+<td align="right">162</td>
+<td align="right">36</td>
+<td align="right">22.22222</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div id="city-vs-resort-hotels" class="section level2">
@@ -1668,12 +1695,35 @@ ggplot(aes(x = lead_time)) +
 hotel_data$total_stay = hotel_data$stays_in_week_nights + hotel_data$stays_in_weekend_nights
 
 group_by(hotel_data, hotel) %&gt;%
-  summarize(count = n(), percent_canceled = (sum(is_canceled)/n())*100, avg_daily_rate = mean(adr, na.rm = T), avg_stay = mean(total_stay, na.rm = T))</code></pre>
-<pre><code>## # A tibble: 2 x 5
-##   hotel        count percent_canceled avg_daily_rate avg_stay
-##   &lt;fct&gt;        &lt;int&gt;            &lt;dbl&gt;          &lt;dbl&gt;    &lt;dbl&gt;
-## 1 City Hotel   79330             41.7          105.      2.98
-## 2 Resort Hotel 40060             27.8           95.0     4.32</code></pre>
+  summarize(count = n(), percent_canceled = (sum(is_canceled)/n())*100, avg_daily_rate = mean(adr, na.rm = T), avg_stay = mean(total_stay, na.rm = T)) %&gt;%
+  kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">hotel</th>
+<th align="right">count</th>
+<th align="right">percent_canceled</th>
+<th align="right">avg_daily_rate</th>
+<th align="right">avg_stay</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">City Hotel</td>
+<td align="right">79330</td>
+<td align="right">41.72696</td>
+<td align="right">105.30447</td>
+<td align="right">2.978142</td>
+</tr>
+<tr class="even">
+<td align="left">Resort Hotel</td>
+<td align="right">40060</td>
+<td align="right">27.76336</td>
+<td align="right">94.95293</td>
+<td align="right">4.318547</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="percent-of-reservations-canceled-in-each-year-and-month-broken-down-by-hotel-type" class="section level4">
 <h4><strong>Percent of Reservations Canceled in Each Year and Month Broken Down By Hotel Type</strong></h4>
@@ -1719,15 +1769,52 @@ City_Hotel_Data = summary(filter(hotel_data, hotel == &quot;City Hotel&quot;)$to
 
 Resort_Hotel_Data = summary(filter(hotel_data, hotel == &quot;Resort Hotel&quot;)$total_stay)
 
-(total_stay_data = as.data.frame(cbind(City_Hotel_Data, Resort_Hotel_Data)))</code></pre>
-<pre><code>##         City_Hotel_Data Resort_Hotel_Data
-## Min.           0.000000          0.000000
-## 1st Qu.        2.000000          2.000000
-## Median         3.000000          3.000000
-## Mean           2.978142          4.318547
-## 3rd Qu.        4.000000          7.000000
-## Max.          57.000000         69.000000</code></pre>
+(total_stay_data = kable(as.data.frame(cbind(City_Hotel_Data, Resort_Hotel_Data))))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">City_Hotel_Data</th>
+<th align="right">Resort_Hotel_Data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Min.</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="even">
+<td align="left">1st Qu.</td>
+<td align="right">2.000000</td>
+<td align="right">2.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Median</td>
+<td align="right">3.000000</td>
+<td align="right">3.000000</td>
+</tr>
+<tr class="even">
+<td align="left">Mean</td>
+<td align="right">2.978142</td>
+<td align="right">4.318547</td>
+</tr>
+<tr class="odd">
+<td align="left">3rd Qu.</td>
+<td align="right">4.000000</td>
+<td align="right">7.000000</td>
+</tr>
+<tr class="even">
+<td align="left">Max.</td>
+<td align="right">57.000000</td>
+<td align="right">69.000000</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>#Histogram showing distribution of percentage of reservations for length of stay broken down by city and resort hotels
+
+#Red line represents the mean of the distribution
+
 filter(hotel_data, total_stay &lt; 20) %&gt;%
 ggplot(aes(x = total_stay)) +
   geom_histogram(aes(y = stat(density)), binwidth = 1) +
@@ -1747,7 +1834,7 @@ ggplot(aes(x = total_stay)) +
 <p>From this here, we can see that the average daily rate is highest when reservations are made with online travel agents, direct reservations, and aviation companies. Additionally, most reservations are made with online travel agents, offline travel agents or tour operators, direct reservations, and groups, respectively.</p>
 <p>An important note is that almost 61% of reservations made by groups are canceled. Another one is that while Aviation does have a high daily rate, there have only been 237 reservations placed over this two year period.</p>
 <p><strong>We would recommend focusing marketing and trying to boost traction with online travel agents, direct reservations, offline travel agents or tour operators, and groups. This is because these all have relatively high average daily rates and make up a significant portion of the number of reservations. From our estimates of total revenue, we can see that online travel agents, offline travel agents, and direct reservations account for the largest chunk of revenue for the hotel chain. When prioritizing, we would focus on online travel agents, then offline travel agents or tour operators, then direct reservations.</strong></p>
-<pre class="r"><code>(market_segment_info = (group_by(hotel_data, market_segment) %&gt;%
+<pre class="r"><code>market_segment_info = (group_by(hotel_data, market_segment) %&gt;%
   summarize(
     avg_daily_rate = round(mean(adr, na.rm = T), 2), 
     avg_stay = mean(total_stay, na.rm = T), 
@@ -1755,19 +1842,105 @@ ggplot(aes(x = total_stay)) +
     num_cancellations = sum(is_canceled), 
     total_revenue = round((round(mean(adr, na.rm = T), 2)*mean(total_stay, na.rm = T))*(n() - sum(is_canceled)), 2)) %&gt;%
   mutate(percent_canceled = round((num_cancellations/count)*100, 2)) %&gt;%
-  arrange(desc(avg_daily_rate))))</code></pre>
-<pre><code>## # A tibble: 8 x 7
-##   market_segment avg_daily_rate avg_stay count num_cancellatio…
-##   &lt;fct&gt;                   &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;            &lt;int&gt;
-## 1 Online TA              117.       3.57 56477            20739
-## 2 Direct                 115.       3.21 12606             1934
-## 3 Aviation               100.       3.61   237               52
-## 4 Offline TA/TO           87.4      3.90 24219             8311
-## 5 Groups                  79.5      2.99 19811            12097
-## 6 Corporate               69.4      2.09  5295              992
-## 7 Undefined               15        1.5      2                2
-## 8 Complementary            2.89     1.65   743               97
-## # … with 2 more variables: total_revenue &lt;dbl&gt;, percent_canceled &lt;dbl&gt;</code></pre>
+  arrange(desc(avg_daily_rate)))
+
+kable(market_segment_info)</code></pre>
+<table>
+<colgroup>
+<col width="15%"></col>
+<col width="15%"></col>
+<col width="9%"></col>
+<col width="6%"></col>
+<col width="19%"></col>
+<col width="14%"></col>
+<col width="18%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">market_segment</th>
+<th align="right">avg_daily_rate</th>
+<th align="right">avg_stay</th>
+<th align="right">count</th>
+<th align="right">num_cancellations</th>
+<th align="right">total_revenue</th>
+<th align="right">percent_canceled</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Online TA</td>
+<td align="right">117.20</td>
+<td align="right">3.573986</td>
+<td align="right">56477</td>
+<td align="right">20739</td>
+<td align="right">14969616.94</td>
+<td align="right">36.72</td>
+</tr>
+<tr class="even">
+<td align="left">Direct</td>
+<td align="right">115.45</td>
+<td align="right">3.205775</td>
+<td align="right">12606</td>
+<td align="right">1934</td>
+<td align="right">3949778.99</td>
+<td align="right">15.34</td>
+</tr>
+<tr class="odd">
+<td align="left">Aviation</td>
+<td align="right">100.14</td>
+<td align="right">3.607595</td>
+<td align="right">237</td>
+<td align="right">52</td>
+<td align="right">66833.94</td>
+<td align="right">21.94</td>
+</tr>
+<tr class="even">
+<td align="left">Offline TA/TO</td>
+<td align="right">87.35</td>
+<td align="right">3.903877</td>
+<td align="right">24219</td>
+<td align="right">8311</td>
+<td align="right">5424686.33</td>
+<td align="right">34.32</td>
+</tr>
+<tr class="odd">
+<td align="left">Groups</td>
+<td align="right">79.48</td>
+<td align="right">2.992529</td>
+<td align="right">19811</td>
+<td align="right">12097</td>
+<td align="right">1834745.87</td>
+<td align="right">61.06</td>
+</tr>
+<tr class="even">
+<td align="left">Corporate</td>
+<td align="right">69.36</td>
+<td align="right">2.092918</td>
+<td align="right">5295</td>
+<td align="right">992</td>
+<td align="right">624644.06</td>
+<td align="right">18.73</td>
+</tr>
+<tr class="odd">
+<td align="left">Undefined</td>
+<td align="right">15.00</td>
+<td align="right">1.500000</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.00</td>
+<td align="right">100.00</td>
+</tr>
+<tr class="even">
+<td align="left">Complementary</td>
+<td align="right">2.89</td>
+<td align="right">1.647376</td>
+<td align="right">743</td>
+<td align="right">97</td>
+<td align="right">3075.55</td>
+<td align="right">13.06</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div id="age-analysis" class="section level2">
@@ -1811,36 +1984,111 @@ filter(hotel_data, adr &lt; 1000, babies &lt; 4) %&gt;%
 <pre class="r"><code>filter(hotel_data, children &lt; 5) %&gt;%
 group_by(children) %&gt;%
   summarize(count = n(), percent_canceled = sum(is_canceled)/n()) %&gt;%
-  arrange(desc(percent_canceled))</code></pre>
-<pre><code>## # A tibble: 4 x 3
-##   children  count percent_canceled
-##      &lt;int&gt;  &lt;int&gt;            &lt;dbl&gt;
-## 1        2   3652            0.422
-## 2        0 110796            0.371
-## 3        1   4861            0.322
-## 4        3     76            0.224</code></pre>
+  arrange(desc(percent_canceled)) %&gt;%
+  kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">children</th>
+<th align="right">count</th>
+<th align="right">percent_canceled</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">3652</td>
+<td align="right">0.4219606</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">110796</td>
+<td align="right">0.3708979</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">4861</td>
+<td align="right">0.3223617</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">76</td>
+<td align="right">0.2236842</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>filter(hotel_data, adults &lt; 5) %&gt;%
 group_by(adults) %&gt;%
   summarize(count = n(), percent_canceled = sum(is_canceled)/n()) %&gt;%
-  arrange(desc(percent_canceled))</code></pre>
-<pre><code>## # A tibble: 5 x 3
-##   adults count percent_canceled
-##    &lt;int&gt; &lt;int&gt;            &lt;dbl&gt;
-## 1      2 89680            0.393
-## 2      3  6202            0.347
-## 3      1 23027            0.290
-## 4      0   403            0.270
-## 5      4    62            0.258</code></pre>
+  arrange(desc(percent_canceled)) %&gt;%
+  kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">adults</th>
+<th align="right">count</th>
+<th align="right">percent_canceled</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">89680</td>
+<td align="right">0.3931534</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">6202</td>
+<td align="right">0.3468236</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">23027</td>
+<td align="right">0.2898337</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">403</td>
+<td align="right">0.2704715</td>
+</tr>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">62</td>
+<td align="right">0.2580645</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>filter(hotel_data, babies &lt; 4) %&gt;%
 group_by(babies) %&gt;%
   summarize(count = n(), percent_canceled = sum(is_canceled)/n()) %&gt;%
-  arrange(desc(percent_canceled))</code></pre>
-<pre><code>## # A tibble: 3 x 3
-##   babies  count percent_canceled
-##    &lt;int&gt;  &lt;int&gt;            &lt;dbl&gt;
-## 1      0 118473            0.372
-## 2      1    900            0.183
-## 3      2     15            0.133</code></pre>
+  arrange(desc(percent_canceled)) %&gt;%
+  kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">babies</th>
+<th align="right">count</th>
+<th align="right">percent_canceled</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">118473</td>
+<td align="right">0.3718738</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">900</td>
+<td align="right">0.1833333</td>
+</tr>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">15</td>
+<td align="right">0.1333333</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 

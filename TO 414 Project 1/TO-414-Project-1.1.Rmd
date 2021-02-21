@@ -41,6 +41,7 @@ After conducting an analysis of two years worth of data from 2015 to 2017, we ha
 First, we are importing the hotel_bookings dataset, so that we may begin to explore and gain helpful insights from it.Now we will identify variables that would be most helpful to us as factors, and convert them into such
 ```{r}
 library(tidyverse)
+library(knitr)
 hotel_data = read.csv("hotel_bookings.csv")
 
 #Converting to factors 
@@ -157,7 +158,8 @@ ggplot(aes(x = lead_time)) +
 We are seeing that 99% of non refundable reservations were canceled. While our calculation makes sense, this is hard to understand in a real world context. **Is there a mistake with the data?**
 ```{r}
 group_by(hotel_data, deposit_type) %>%
-  summarize(count = n(), cancellations = sum(is_canceled), percent_canceled = (sum(is_canceled)/n())*100)
+  summarize(count = n(), cancellations = sum(is_canceled), percent_canceled = (sum(is_canceled)/n())*100) %>%
+  kable()
 ```
 
 
@@ -173,7 +175,8 @@ City hotel reservations are canceled almost 42% of the time while resort hotels 
 hotel_data$total_stay = hotel_data$stays_in_week_nights + hotel_data$stays_in_weekend_nights
 
 group_by(hotel_data, hotel) %>%
-  summarize(count = n(), percent_canceled = (sum(is_canceled)/n())*100, avg_daily_rate = mean(adr, na.rm = T), avg_stay = mean(total_stay, na.rm = T))
+  summarize(count = n(), percent_canceled = (sum(is_canceled)/n())*100, avg_daily_rate = mean(adr, na.rm = T), avg_stay = mean(total_stay, na.rm = T)) %>%
+  kable()
 ```
 
 #### **Percent of Reservations Canceled in Each Year and Month Broken Down By Hotel Type**
@@ -223,11 +226,14 @@ City_Hotel_Data = summary(filter(hotel_data, hotel == "City Hotel")$total_stay)
 
 Resort_Hotel_Data = summary(filter(hotel_data, hotel == "Resort Hotel")$total_stay)
 
-(total_stay_data = as.data.frame(cbind(City_Hotel_Data, Resort_Hotel_Data)))
+(total_stay_data = kable(as.data.frame(cbind(City_Hotel_Data, Resort_Hotel_Data))))
 ```
 
 ```{r}
 #Histogram showing distribution of percentage of reservations for length of stay broken down by city and resort hotels
+
+#Red line represents the mean of the distribution
+
 filter(hotel_data, total_stay < 20) %>%
 ggplot(aes(x = total_stay)) +
   geom_histogram(aes(y = stat(density)), binwidth = 1) +
@@ -250,7 +256,7 @@ An important note is that almost 61% of reservations made by groups are canceled
 
 **We would recommend focusing marketing and trying to boost traction with online travel agents, direct reservations, offline travel agents or tour operators, and groups. This is because these all have relatively high average daily rates and make up a significant portion of the number of reservations. From our estimates of total revenue, we can see that online travel agents, offline travel agents, and direct reservations account for the largest chunk of revenue for the hotel chain. When prioritizing, we would focus on online travel agents, then offline travel agents or tour operators, then direct reservations.**
 ```{r}
-(market_segment_info = (group_by(hotel_data, market_segment) %>%
+market_segment_info = (group_by(hotel_data, market_segment) %>%
   summarize(
     avg_daily_rate = round(mean(adr, na.rm = T), 2), 
     avg_stay = mean(total_stay, na.rm = T), 
@@ -258,7 +264,9 @@ An important note is that almost 61% of reservations made by groups are canceled
     num_cancellations = sum(is_canceled), 
     total_revenue = round((round(mean(adr, na.rm = T), 2)*mean(total_stay, na.rm = T))*(n() - sum(is_canceled)), 2)) %>%
   mutate(percent_canceled = round((num_cancellations/count)*100, 2)) %>%
-  arrange(desc(avg_daily_rate))))
+  arrange(desc(avg_daily_rate)))
+
+kable(market_segment_info)
 ```
 
 ## **Age Analysis**
@@ -305,17 +313,20 @@ We can see here that there doesn't seem to be a trend between the percentage of 
 filter(hotel_data, children < 5) %>%
 group_by(children) %>%
   summarize(count = n(), percent_canceled = sum(is_canceled)/n()) %>%
-  arrange(desc(percent_canceled))
+  arrange(desc(percent_canceled)) %>%
+  kable()
 
 filter(hotel_data, adults < 5) %>%
 group_by(adults) %>%
   summarize(count = n(), percent_canceled = sum(is_canceled)/n()) %>%
-  arrange(desc(percent_canceled))
+  arrange(desc(percent_canceled)) %>%
+  kable()
 
 filter(hotel_data, babies < 4) %>%
 group_by(babies) %>%
   summarize(count = n(), percent_canceled = sum(is_canceled)/n()) %>%
-  arrange(desc(percent_canceled))
+  arrange(desc(percent_canceled)) %>%
+  kable()
 ```
 
 
